@@ -42,9 +42,12 @@ export const TodoProvider: React.FC<{ children: React.ReactNode }> = ({
         createdAt: Date.now(),
         updatedAt: Date.now(),
       };
-      const updatedTodos = [...todos, newTodo];
-      await storage.saveTodos(updatedTodos);
-      setTodos(updatedTodos);
+
+      setTodos((_todos) => {
+        const updatedTodos = [..._todos, newTodo];
+        storage.saveTodos(updatedTodos);
+        return updatedTodos;
+      });
       return newTodo;
     } catch (err) {
       setError("Failed to add todo");
@@ -58,12 +61,16 @@ export const TodoProvider: React.FC<{ children: React.ReactNode }> = ({
   ) => {
     try {
       // console.info('@@ before update>>> ', todos);
-      const updatedTodos = todos.map((todo) =>
-        todo.id === id ? { ...todo, ...todoInput, updatedAt: Date.now() } : todo
-      );
-      
-      await storage.saveTodos(updatedTodos);
-      setTodos(updatedTodos);
+      setTodos((_todos) => {
+        const updatedTodos = _todos.map((todo) =>
+          todo.id === id
+            ? { ...todo, ...todoInput, updatedAt: Date.now() }
+            : todo
+        );
+
+        storage.saveTodos(updatedTodos);
+        return updatedTodos;
+      });
     } catch (err) {
       setError("Failed to update todo");
     }
@@ -72,10 +79,11 @@ export const TodoProvider: React.FC<{ children: React.ReactNode }> = ({
   const deleteTodo = async (id: string) => {
     try {
       // console.log('@@@ delete>>> ', todos);
-      
-      const updatedTodos = todos.filter((todo) => todo.id !== id);
-      await storage.saveTodos(updatedTodos);
-      setTodos(updatedTodos);
+      setTodos(_todos => {
+        const updatedTodos = _todos.filter((todo) => todo.id !== id);
+        storage.saveTodos(updatedTodos);
+        return (updatedTodos);
+      })
     } catch (err) {
       setError("Failed to delete todo");
     }
@@ -83,13 +91,15 @@ export const TodoProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const toggleTodo = async (id: string) => {
     try {
-      const updatedTodos = todos.map((todo) =>
-        todo.id === id
-          ? { ...todo, completed: !todo.completed, updatedAt: Date.now() }
-          : todo
-      );
-      await storage.saveTodos(updatedTodos);
-      setTodos(updatedTodos);
+      setTodos((_todos) => {
+        const updatedTodos = _todos.map((todo) =>
+          todo.id === id
+            ? { ...todo, completed: !todo.completed, updatedAt: Date.now() }
+            : todo
+        );
+        storage.saveTodos(updatedTodos);
+        return updatedTodos;
+      });
     } catch (err) {
       setError("Failed to toggle todo");
     }

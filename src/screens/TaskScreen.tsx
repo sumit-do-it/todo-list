@@ -1,4 +1,6 @@
 import {
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -12,13 +14,20 @@ import Header from "../components/Header";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import useAppNavigation from "../hooks/useAppNavigation";
 import useTaskScreen from "../hooks/useTaskScreen";
-import { useRoute } from "@react-navigation/native";
+import { useRoute, RouteProp } from "@react-navigation/native";
+
+type TaskScreenParams = {
+  id?: string;
+};
+
+type TaskScreenRouteProp = RouteProp<{ TaskScreen: TaskScreenParams }, 'TaskScreen'>;
 
 const TaskScreen: React.FC = () => {
-  const { params } = useRoute();
-  const { titleRef, title, description, setTitle, setDescription } = useTaskScreen({
-    id: params?.id,
-  });
+  const { params } = useRoute<TaskScreenRouteProp>();
+  const { titleRef, descriptionRef, scrollRef, title, description, setTitle, setDescription } =
+    useTaskScreen({
+      id: params?.id,
+    });
   const { handleBack } = useAppNavigation();
   const backButton = () => {
     return (
@@ -29,9 +38,12 @@ const TaskScreen: React.FC = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
       <Header title={"Your Task"} leftIcon={backButton()} />
-      <ScrollView contentContainerStyle={styles.contentContainer}>
+      <ScrollView ref={scrollRef} contentContainerStyle={styles.contentContainer}>
         <TextInput
           ref={titleRef}
           multiline
@@ -41,6 +53,7 @@ const TaskScreen: React.FC = () => {
           onChangeText={setTitle}
         />
         <TextInput
+          ref={descriptionRef}
           multiline
           style={styles.contentInput}
           placeholder="✍️"
@@ -49,7 +62,7 @@ const TaskScreen: React.FC = () => {
         />
         <View style={styles.footer} />
       </ScrollView>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -81,7 +94,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 22,
     fontWeight: "500",
-    letterSpacing: 1.2,
+    color: colors.gray,
   },
   footer: {
     height: 200,
